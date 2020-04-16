@@ -1,37 +1,49 @@
 'use strict'
 
-const Telegraf = require('telegraf')
-const { Markup } = Telegraf
+const mysql = require('mysql');
 
 require('dotenv').config()
+
+const conn = mysql.createConnection({
+    host: process.env.DATABASE_HOST,
+    user: process.env.DATABASE_USER,
+    password: process.env.DATABASE_PASS,
+    database: process.env.DATABASE_NAME
+})
+// let products = [];
+conn.connect(function(err){
+    if(err){
+        throw err;
+    }
+    //console.log('connected...')
+    conn.query("SELECT * FROM product", function(err, result, fields){
+        if(err){
+            throw err;
+        }
+        //console.log(result)
+        result.forEach(item => {
+            products.push({
+                name: item.product_name,
+                price: item.product_price
+            })
+        })
+    })
+})
+
+const Telegraf = require('telegraf')
+const { Markup } = Telegraf
 
 const app = new Telegraf(process.env.MY_BOT_TOKEN) 
 const PAYMENT_TOKEN = process.env.MY_STRIPE_TOKEN
 
-const products = [
-    {
-        name: 'Teh Botol Sosro',
-        price: 16000,
-        description: 'Tehbotol Sosro kemasan botol beling atau sering disebut RGB ( Returnable Glass Bottle) merupakan produk Teh siap minum yang pertama di Indonesia dan di Dunia yang sudah diluncurkan sejak tahun 1969!'
-    },
-    {
-        name: 'Teh Freshtea',
-        price: 19000,
-        description: 'Frestea diproduksi dengan menggunakan standar kualitas tinggi The Coca-Cola Company, menggunakan teknologi tinggi dan didukung oleh proses produksi higienis.'
-    },
-    {
-        name: 'Teh Kotak',
-        price: 21000,
-        description: 'Teh Kotak adalah minuman teh yang terbuat dari pucuk daun teh berkualitas tinggi, teh ini mengandung mineral dan vitamin yang baik bagi tubuh.'
-    }
-]
+const products = []
 
 function createInvoice (product) {
     return {
         provider_token: PAYMENT_TOKEN,
         start_parameter: 'foo',
         title: product.name,
-        description: product.description,
+        description: product.name,
         currency: 'IDR',
         is_flexible: false,
         need_shipping_address: false,
@@ -53,6 +65,13 @@ mau beli yang mana?`,
 ))
 
 // Order product
+products.forEach(p => {
+    app.hears(p.product_name, (ctx) => {
+        console.log(`${ctx.from.first_name} is about to buy a ${p.name}.`);
+        ctx.replyWithInvoice(createInvoice(p));
+    })
+})
+
 products.forEach(p => {
     app.hears(p.name, (ctx) => {
         console.log(`${ctx.from.first_name} is about to buy a ${p.name}.`);
