@@ -1,5 +1,5 @@
 {
-  "name": "telegram-payment-bot",
+  "name": "telegram-bot",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -10,6 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "dotenv": "^8.2.0",
+    "mysql": "^2.18.1",
     "telegraf": "^3.37.0"
   }
 }
+
