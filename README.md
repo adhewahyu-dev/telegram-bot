@@ -2,14 +2,14 @@
 
 #### Waiting for the server working
 
-## How To API
+## Run the API
 
 ```sh
 Terminal 1 
 $ npm run start
 ```
 
-## How To Start Chatbot
+## Run the Chatbot
 
 ```sh
 Terminal 2
